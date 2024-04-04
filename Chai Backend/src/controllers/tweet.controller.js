@@ -27,14 +27,14 @@ const getUserTweets = asyncHandler(async (req, res) => {
     const tweets = await User.aggregate([
         {
             $match: {
-                username: username?.toLowerCase(),
+                _id: new mongoose.Types.ObjectId(username?.toLowerCase()),
             },
         },
         {
             $lookup: {
                 from: "tweets",
                 localField: "_id",
-                foreignField: "user",
+                foreignField: "owner",
                 as: "tweets",
             },
         },
@@ -51,7 +51,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     if (!tweets) throw new ApiError(400, "No tweets found!");
 
     res.status(200).json(
-        new ApiResponse(200, tweets[0], "Tweets found successfully")
+        new ApiResponse(200, tweets, "Tweets found successfully")
     );
 });
 

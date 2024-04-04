@@ -10,29 +10,34 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
     //TODO: get all videos based on query, sort, pagination
 
-    const queryConditions = query
-        ? { title: { $regex: query, $options: "i" } }
-        : {};
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
 
-    if (userId) {
-        queryConditions.owner = userId;
+    const pipeline = [];
+
+    const matchStage = {};
+
+    if (query) {
+        matchStage.$match = { $text: { $search: query } };
     }
 
-    const pageNumber = parseInt(page) || 1;
-    const pageSize = parseInt(limit) || 10;
+    pipeline.push({ $match: matchStage });
 
-    const skip = (pageNumber - 1) * pageSize;
+    if (sortBy) {
+        const sortOptions = {};
+        sortOptions[sortBy] = sortType === "desc" ? -1 : 1;
+        pipeline.push({ $sort: sortOptions });
+    }
 
-    const videos = await Video.find(queryConditions)
-        .sort({ [sortBy]: sortType === "asc" ? 1 : -1 })
-        .skip(skip)
-        .limit(pageSize)
-        .exec();
+    pipeline.push({ $skip: (pageNumber - 1) * limitNumber });
+    pipeline.push({ $limit: limitNumber });
 
-    if (!videos) throw new ApiError(400, "Video not found!");
+    const videos = await Video.aggregate(pipeline);
+
+    if (!videos) throw new ApiError(400, "No videos found!");
 
     res.status(200).json(
-        new ApiResponse(200, videos, "Videos found successfully!")
+        new ApiResponse(200, videos, "Videos fetched successfully!")
     );
 });
 

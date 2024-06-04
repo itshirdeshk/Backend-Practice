@@ -41,6 +41,7 @@ io.on("connection", (socket) => {
     })
 })
 
-app.listen(process.env.PORT_EXPRESS, () => {
-    console.log(`HTTP Server listening on PORT ${process.env.PORT_EXPRESS}`);
+app.listen(process.env.PORT, () => {
+    console.log(`HTTP Server listening on PORT ${process.env.PORT}`);
+    console.log(`IO Server listening on PORT ${process.env.PORT_IO}`);
 })

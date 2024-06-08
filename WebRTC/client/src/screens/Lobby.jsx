@@ -28,7 +28,7 @@ const LobbyScreen = () => {
     }, [socket, handleJoinRoom])
 
     return (
-        <div className="homepage-container">
+        <div>
             <h1>Lobby</h1>
             <form onSubmit={handleSubmitForm}>
                 <label htmlFor="email">Email Id</label>
